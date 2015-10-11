@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import edu.anb.core.ChartItem;
 import edu.anb.core.ChartItemCollection;
+import edu.anb.core.EntityType;
 
 public class AnbCsvFileReaderTestCase {
 
@@ -32,7 +33,15 @@ public class AnbCsvFileReaderTestCase {
 		AnbParsingContext parsingContext = new AnbParsingContext();
 		parsingContext.setHeader(true);
 		parsingContext.setAttributeSeparator(",");
+		
 		AnbBuilderContext builderContext = new AnbBuilderContext();
+		// Create a person type
+		EntityType personType = new EntityType();
+		personType.setId("Person_Type");
+		personType.setIconFile("anon");
+		personType.setName("Person");
+		builderContext.setDefaultEntityType(personType);
+		
 		AnbInputDataset inputDataset = reader.readFile(csvFile, parsingContext, builderContext);
 		assertNotNull("The input dataset must not be null!", inputDataset);
 		

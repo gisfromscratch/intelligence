@@ -14,6 +14,7 @@ import edu.anb.core.Attribute;
 import edu.anb.core.AttributeCollection;
 import edu.anb.core.ChartItem;
 import edu.anb.core.ChartItemCollection;
+import edu.anb.core.End;
 
 /**
  * Reads simple CSV files and creates items representing nodes or links with attributes.
