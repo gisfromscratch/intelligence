@@ -29,7 +29,11 @@ public class AnbCsvFileReaderTestCase {
 		assertTrue("CSV file is missing!", csvFile.exists());
 		
 		AnbCsvFileReader reader = new AnbCsvFileReader();
-		AnbInputDataset inputDataset = reader.readFile(csvFile, true, ",");
+		AnbParsingContext parsingContext = new AnbParsingContext();
+		parsingContext.setHeader(true);
+		parsingContext.setAttributeSeparator(",");
+		AnbBuilderContext builderContext = new AnbBuilderContext();
+		AnbInputDataset inputDataset = reader.readFile(csvFile, parsingContext, builderContext);
 		assertNotNull("The input dataset must not be null!", inputDataset);
 		
 		ChartItemCollection chartItemCollection = inputDataset.getChartItemCollection();
