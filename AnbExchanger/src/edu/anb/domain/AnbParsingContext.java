@@ -12,6 +12,8 @@ public class AnbParsingContext {
 	
 	private String attributeSeparator;
 	
+	private String idAttributeName;
+	
 	public boolean hasHeader() {
 		return hasHeader;
 	}
@@ -26,5 +28,13 @@ public class AnbParsingContext {
 	
 	public void setAttributeSeparator(String separator) {
 		attributeSeparator = separator;
+	}
+
+	public String getIdAttributeName() {
+		return idAttributeName;
+	}
+
+	public void setIdAttributeName(String name) {
+		idAttributeName = name;
 	}
 }

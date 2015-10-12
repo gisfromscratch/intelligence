@@ -29,12 +29,19 @@ public class AnbBuilderContext {
 	private final Random random;
 	
 	private final Set<EntityType> entityTypes;
+	private final Set<LinkType> linkTypes;
 	
 	private EntityType defaultEntityType;
+	private LinkType defaultLinkType;
 	
 	public AnbBuilderContext() {
 		random = new Random();
 		entityTypes = new HashSet<EntityType>();
+		linkTypes = new HashSet<LinkType>();
+		
+		AnbTypeFactory typeFactory = new AnbTypeFactory();
+		defaultEntityType = typeFactory.createEntityType("Unknown", "Case");
+		defaultLinkType = typeFactory.createLinkType("Link");
 	}
 	
 	public EntityType getDefaultEntityType() {
@@ -45,8 +52,20 @@ public class AnbBuilderContext {
 		defaultEntityType = type;
 	}
 	
+	public LinkType getDefaultLinkType() {
+		return defaultLinkType;
+	}
+
+	public void setDefaultLinkType(LinkType type) {
+		this.defaultLinkType = type;
+	}
+
 	public Collection<EntityType> getEntityTypes() {
 		return entityTypes;
+	}
+	
+	public Collection<LinkType> getLinkTypes() {
+		return linkTypes;
 	}
 	
 	/**
@@ -84,6 +103,25 @@ public class AnbBuilderContext {
 		return item;
 	}
 	
+	public ChartItem buildLinkChartItem(ChartItem startItem, ChartItem endItem) {
+		ChartItem linkItem = new ChartItem();
+		String unqiueId = AnbUniqueId.generateUniqueId();
+		linkItem.setId(unqiueId);
+		if (null != defaultLinkType) {
+			// Create the link
+			Link link = createLink(defaultLinkType);
+			link.setEnd1Reference(startItem);
+			link.setEnd2Reference(endItem);
+			linkItem.setLink(link);
+			linkItem.setLabel(String.format("%s -> %s", startItem.getLabel(), endItem.getLabel()));
+			
+			if (!linkTypes.contains(defaultLinkType)) {
+				linkTypes.add(defaultLinkType);
+			}
+		}
+		return linkItem;
+	}
+	
 	private static End createEnd(EntityType entityType) {
 		End end = new End();
 		Entity entity = new Entity();
@@ -96,7 +134,7 @@ public class AnbBuilderContext {
 		return end;
 	}
 
-	private static Link createLink(LinkType linkType) {
+	static Link createLink(LinkType linkType) {
 		Link link = new Link();
 		LinkStyle linkStyle = new LinkStyle();
 		linkStyle.setLineWidth(5);

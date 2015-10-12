@@ -20,7 +20,7 @@ import edu.anb.domain.AnbBuilderContext;
 import edu.anb.domain.AnbChartFactory;
 import edu.anb.domain.AnbInputDataset;
 import edu.anb.domain.AnbParsingContext;
-import edu.anb.domain.AnbEntityTypeFactory;
+import edu.anb.domain.AnbTypeFactory;
 
 public class AnbCsvFileReaderTestCase {
 
@@ -45,8 +45,8 @@ public class AnbCsvFileReaderTestCase {
 		AnbBuilderContext builderContext = new AnbBuilderContext();
 		
 		// Create a person type
-		AnbEntityTypeFactory entityTypeFactory = new AnbEntityTypeFactory();
-		EntityType personType = entityTypeFactory.create("Person", "anon");
+		AnbTypeFactory entityTypeFactory = new AnbTypeFactory();
+		EntityType personType = entityTypeFactory.createEntityType("Person", "anon");
 		builderContext.setDefaultEntityType(personType);
 		
 		AnbInputDataset inputDataset = reader.readFile(csvFile, parsingContext, builderContext);
@@ -60,6 +60,37 @@ public class AnbCsvFileReaderTestCase {
 		
 		int chartItemCount = chartItemList.size();
 		assertEquals("The number of chart items is wrong!", 40129, chartItemCount);
+	}
+	
+	@Test
+	public void csvReadWithAttributeIdTest() throws IOException {
+		File csvFile = new File("data/RAND_Database_of_Worldwide_Terrorism_Incidents.csv");
+		assertTrue("CSV file is missing!", csvFile.exists());
+		
+		AnbCsvFileReader reader = new AnbCsvFileReader();
+		AnbParsingContext parsingContext = new AnbParsingContext();
+		parsingContext.setHeader(true);
+		parsingContext.setAttributeSeparator(",");
+		parsingContext.setIdAttributeName("Date");
+		
+		AnbBuilderContext builderContext = new AnbBuilderContext();
+		
+		// Create a person type
+		AnbTypeFactory entityTypeFactory = new AnbTypeFactory();
+		EntityType personType = entityTypeFactory.createEntityType("Person", "anon");
+		builderContext.setDefaultEntityType(personType);
+		
+		AnbInputDataset inputDataset = reader.readFile(csvFile, parsingContext, builderContext);
+		assertNotNull("The input dataset must not be null!", inputDataset);
+		
+		ChartItemCollection chartItemCollection = inputDataset.getChartItemCollection();
+		assertNotNull("The chart item collection must not be null!", chartItemCollection);
+		
+		List<ChartItem> chartItemList = chartItemCollection.getChartItem();
+		assertNotNull("The chart item list must not be null!", chartItemList);
+		
+		int chartItemCount = chartItemList.size();
+		//assertEquals("The number of chart items is wrong!", 40129, chartItemCount);
 	}
 
 	@Test
@@ -75,8 +106,8 @@ public class AnbCsvFileReaderTestCase {
 		AnbBuilderContext builderContext = new AnbBuilderContext();
 		
 		// Create a person type
-		AnbEntityTypeFactory entityTypeFactory = new AnbEntityTypeFactory();
-		EntityType personType = entityTypeFactory.create("Person", "anon");
+		AnbTypeFactory entityTypeFactory = new AnbTypeFactory();
+		EntityType personType = entityTypeFactory.createEntityType("Person", "anon");
 		builderContext.setDefaultEntityType(personType);
 		
 		AnbInputDataset inputDataset = reader.readFile(csvFile, parsingContext, builderContext);
