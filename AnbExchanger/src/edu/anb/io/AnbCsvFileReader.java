@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -61,7 +62,7 @@ public class AnbCsvFileReader {
 				String separator = parsingContext.getAttributeSeparator();
 				StringTokenizer tokenizer = new StringTokenizer(line, separator);
 				int attributeCount = tokenizer.countTokens();
-				if (!hasHeader) {
+				if (readAsHeader && !hasHeader) {
 					// Generate attribute names
 					for (int attributeIndex = 0; attributeIndex < attributeCount; attributeIndex++) {
 						String attributeName = String.format("Attribute_%d", attributeIndex);
@@ -80,6 +81,19 @@ public class AnbCsvFileReader {
 						if (0 < nextToken.length() && !attributeClasses.containsKey(nextToken)) {
 							AttributeClass attributeClass = addAttributeClass(nextToken, attributeClassCollection);
 							attributeClasses.put(tokenIndex, attributeClass);
+							
+							// Determine the label index
+							List<Integer> labelIndexList = builderContext.getLabelIndexList();
+							Collection<String> labelAttributeNames = parsingContext.getLabelAttributeNames();
+							if (null != labelAttributeNames && !labelAttributeNames.isEmpty()) {
+								for (String labelAttributeName : labelAttributeNames) {
+									if (null != attributeClass.getName() 
+											&& null != labelAttributeName
+											&& 0 == labelAttributeName.compareToIgnoreCase(attributeClass.getName())) {
+										labelIndexList.add(attributeClasses.size() - 1);
+									}
+								}
+							}
 						}
 					} else if (attributeClasses.containsKey(tokenIndex)) {						
 						// Read the token as attribute value

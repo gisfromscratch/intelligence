@@ -1,5 +1,6 @@
 package edu.anb.domain;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -34,6 +35,8 @@ public class AnbBuilderContext {
 	private EntityType defaultEntityType;
 	private LinkType defaultLinkType;
 	
+	private final List<Integer> labelIndexList;
+	
 	public AnbBuilderContext() {
 		random = new Random();
 		entityTypes = new HashSet<EntityType>();
@@ -42,6 +45,8 @@ public class AnbBuilderContext {
 		AnbTypeFactory typeFactory = new AnbTypeFactory();
 		defaultEntityType = typeFactory.createEntityType("Unknown", "Case");
 		defaultLinkType = typeFactory.createLinkType("Link");
+		
+		labelIndexList = new ArrayList<Integer>();
 	}
 	
 	public EntityType getDefaultEntityType() {
@@ -68,6 +73,10 @@ public class AnbBuilderContext {
 		return linkTypes;
 	}
 	
+	public List<Integer> getLabelIndexList() {
+		return labelIndexList;
+	}
+	
 	/**
 	 * Creates an unique ID and position the chart item at random.
 	 * The first attribute value is used for the label.
@@ -84,8 +93,20 @@ public class AnbBuilderContext {
 		
 		AttributeCollection attributeCollection = item.getAttributeCollection();
 		List<Attribute> attributeList = attributeCollection.getAttribute();
+		Attribute labelAttribute = null;
 		if (!attributeList.isEmpty()) {
-			Attribute labelAttribute = attributeList.get(0);
+			if (!labelIndexList.isEmpty()) {
+				int labelIndex = labelIndexList.get(0);
+				if (labelIndex < attributeList.size()) {
+					labelAttribute = attributeList.get(labelIndex);
+				}
+			}
+			
+			if (null == labelAttribute) {
+				labelAttribute = attributeList.get(0);
+			}
+		}
+		if (null != labelAttribute) {
 			item.setLabel(labelAttribute.getValue());
 		}
 		
@@ -137,7 +158,7 @@ public class AnbBuilderContext {
 	static Link createLink(LinkType linkType) {
 		Link link = new Link();
 		LinkStyle linkStyle = new LinkStyle();
-		linkStyle.setLineWidth(5);
+		linkStyle.setLineWidth(1);
 		linkStyle.setLinkTypeReference(linkType);
 		link.setLinkStyle(linkStyle);
 		return link;
