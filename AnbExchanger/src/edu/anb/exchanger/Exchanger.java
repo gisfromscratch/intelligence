@@ -19,11 +19,12 @@ public class Exchanger {
 
 	public static void main(String[] args) throws JAXBException, IOException {		
 		if (3 != args.length) {
-			System.out.println("Usage: <csv> <icon>");
+			System.out.println("Usage: <csv> <name> <icon> <start> <end> <link>");
 			System.out.println("\t<csv>:\t\tThe path to the CSV file.");
 			System.out.println("\t<name>:\t\tThe name of the entity type.");
 			System.out.println("\t<icon>:\t\tThe name of the icon.");
 			System.out.println("\texample:\tC:/input/dates.csv Events event");
+			System.out.println("");
 			return;
 		}
 		
