@@ -9,12 +9,22 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.UUID;
 
 import edu.anb.core.Attribute;
+import edu.anb.core.AttributeClass;
+import edu.anb.core.AttributeClassCollection;
 import edu.anb.core.AttributeCollection;
+import edu.anb.core.AttributeTypeEnum;
 import edu.anb.core.ChartItem;
 import edu.anb.core.ChartItemCollection;
 import edu.anb.core.End;
+import edu.anb.core.EntityType;
+import edu.anb.core.EntityTypeCollection;
+import edu.anb.domain.AnbBuilderContext;
+import edu.anb.domain.AnbInputDataset;
+import edu.anb.domain.AnbParsingContext;
+import edu.anb.domain.AnbUniqueId;
 
 /**
  * Reads simple CSV files and creates items representing nodes or links with attributes.
@@ -34,13 +44,14 @@ public class AnbCsvFileReader {
 	 */
 	public AnbInputDataset readFile(File csvFile, AnbParsingContext parsingContext, AnbBuilderContext builderContext) throws IOException {
 		AnbInputDataset dataset = new AnbInputDataset();
-		HashMap<Integer, String> attributeNames = new HashMap<Integer, String>();
+		AttributeClassCollection attributeClassCollection = dataset.getAttributeClassCollection();
+		HashMap<Integer, AttributeClass> attributeClasses = new HashMap<Integer, AttributeClass>();
 		
 		LineNumberReader reader = new LineNumberReader(new FileReader(csvFile));
 		try {
 			String line;
 			while (null != (line = reader.readLine())) {
-				boolean readAsHeader = attributeNames.isEmpty();
+				boolean readAsHeader = attributeClasses.isEmpty();
 				boolean hasHeader = parsingContext.hasHeader();
 				String separator = parsingContext.getAttributeSeparator();
 				StringTokenizer tokenizer = new StringTokenizer(line, separator);
@@ -48,7 +59,9 @@ public class AnbCsvFileReader {
 				if (!hasHeader) {
 					// Generate attribute names
 					for (int attributeIndex = 0; attributeIndex < attributeCount; attributeIndex++) {
-						attributeNames.put(attributeIndex, String.format("Attribute_%d", attributeIndex));
+						String attributeName = String.format("Attribute_%d", attributeIndex);
+						AttributeClass attributeClass = addAttributeClass(attributeName, attributeClassCollection);
+						attributeClasses.put(attributeIndex, attributeClass);
 					}
 					readAsHeader = false;
 				}
@@ -58,10 +71,13 @@ public class AnbCsvFileReader {
 					String nextToken = tokenizer.nextToken().trim();
 					if (readAsHeader) {
 						// Read the token as attribute name
-						if (0 < nextToken.length() && !attributeNames.containsKey(nextToken)) {
-							attributeNames.put(tokenIndex, nextToken);
+						if (0 < nextToken.length() && !attributeClasses.containsKey(nextToken)) {
+							AttributeClass attributeClass = addAttributeClass(nextToken, attributeClassCollection);
+							attributeClasses.put(tokenIndex, attributeClass);
 						}
-					} else if (attributeNames.containsKey(tokenIndex)) {
+					} else if (attributeClasses.containsKey(tokenIndex)) {
+						AttributeClass attributeClass = attributeClasses.get(tokenIndex);
+						
 						// Read the token as attribute value
 						if (null == chartItem) {
 							chartItem = new ChartItem();
@@ -72,6 +88,7 @@ public class AnbCsvFileReader {
 						AttributeCollection attributeCollection = chartItem.getAttributeCollection();
 						List<Attribute> attributeList = attributeCollection.getAttribute();
 						Attribute attribute = new Attribute();
+						attribute.setAttributeClassReference(attributeClass);
 						attribute.setValue(nextToken);
 						attributeList.add(attribute);
 					}
@@ -85,10 +102,28 @@ public class AnbCsvFileReader {
 					chartItemList.add(chartItem);
 				}
 			}
+			
+			// Add the entity types to the dataset
+			EntityTypeCollection entityTypeCollection = dataset.getEntityTypeCollection();
+			List<EntityType> entityTypeList = entityTypeCollection.getEntityType();
+			entityTypeList.addAll(builderContext.getEntityTypes());			
 		}
 		finally {
 			reader.close();
 		}
 		return dataset;
+	}
+	
+	private static AttributeClass addAttributeClass(String attributeName, AttributeClassCollection attributeClassCollection) {
+		List<AttributeClass> attributeClassList = attributeClassCollection.getAttributeClass();
+		AttributeClass attributeClass = new AttributeClass();
+		String uniqueId = AnbUniqueId.generateUniqueId();
+		attributeClass.setId(uniqueId);
+		attributeClass.setName(attributeName);
+		attributeClass.setType(AttributeTypeEnum.ATT_TEXT);
+		attributeClass.setUserCanAdd(true);
+		attributeClass.setUserCanRemove(true);
+		attributeClassList.add(attributeClass);
+		return attributeClass;
 	}
 }
